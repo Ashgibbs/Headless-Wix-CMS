@@ -1,4 +1,4 @@
-import { useCMSTours, useCMSTemples } from '@/hooks/useCMSData';
+import { useCMSTours, useCMSTemples } from '@/hooks/useWixCMS';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export function WixCMSDebug() {
   const { tours, isLoading: toursLoading, error: toursError, refetch: refetchTours } = useCMSTours();
   const { temples, isLoading: templesLoading, error: templesError, refetch: refetchTemples } = useCMSTemples();
-  
+
   const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY;
 
   return (

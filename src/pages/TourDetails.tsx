@@ -1,18 +1,18 @@
 import { useParams, Link } from "react-router-dom";
-import { 
-  MapPin, 
-  Star, 
-  Clock, 
-  Users, 
-  Calendar, 
-  CheckCircle, 
+import {
+  MapPin,
+  Star,
+  Clock,
+  Users,
+  Calendar,
+  CheckCircle,
   ArrowLeft,
   Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/layout/Layout";
-import { useCMSTours } from "@/hooks/useCMSData";
+import { useCMSTours } from "@/hooks/useWixCMS";
 
 const TourDetails = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -44,14 +44,14 @@ const TourDetails = () => {
           <div className="absolute bottom-10 right-10 w-60 h-60 border border-primary-foreground/50 rounded-full" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             <span className="font-body">Back to Home</span>
           </Link>
-          
+
           <div className="max-w-4xl">
             <Badge className="bg-saffron text-saffron-foreground border-none mb-4">
               Featured Tour
@@ -62,7 +62,7 @@ const TourDetails = () => {
             <p className="font-body text-lg text-primary-foreground/80 mb-6">
               {tour.longDescription}
             </p>
-            
+
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 bg-primary-foreground/10 px-4 py-2 rounded-full">
                 <Clock size={18} className="text-primary-foreground" />
@@ -115,7 +115,7 @@ const TourDetails = () => {
           <h2 className="font-display text-2xl font-bold text-foreground mb-6">Cities Covered</h2>
           <div className="flex flex-wrap gap-3">
             {tour.citiesCovered.map((city, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-center gap-2 bg-muted px-4 py-2 rounded-full"
               >
@@ -133,7 +133,7 @@ const TourDetails = () => {
           <h2 className="font-display text-2xl font-bold text-foreground mb-6">Tour Highlights</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {tour.highlights.map((highlight, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-start gap-3 bg-background p-4 rounded-xl"
               >
@@ -160,7 +160,7 @@ const TourDetails = () => {
 
           <div className="max-w-4xl mx-auto space-y-6">
             {tour.itinerary.map((day, index) => (
-              <div 
+              <div
                 key={index}
                 className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-elevated transition-shadow"
               >
@@ -176,12 +176,12 @@ const TourDetails = () => {
                     </h3>
                   </div>
                 </div>
-                
+
                 <div className="p-6 space-y-4">
                   <p className="font-body text-muted-foreground">
                     {day.description}
                   </p>
-                  
+
                   {day.temples && day.temples.length > 0 && (
                     <div>
                       <p className="font-body text-sm font-medium text-foreground mb-2">
@@ -189,8 +189,8 @@ const TourDetails = () => {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {day.temples.map((temple, i) => (
-                          <Badge 
-                            key={i} 
+                          <Badge
+                            key={i}
                             variant="secondary"
                             className="bg-secondary/10 text-secondary border-secondary/20"
                           >
@@ -200,7 +200,7 @@ const TourDetails = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {day.cities && day.cities.length > 0 && (
                     <div>
                       <p className="font-body text-sm font-medium text-foreground mb-2">
@@ -208,7 +208,7 @@ const TourDetails = () => {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {day.cities.map((city, i) => (
-                          <span 
+                          <span
                             key={i}
                             className="inline-flex items-center gap-1 text-sm text-muted-foreground"
                           >
@@ -233,7 +233,7 @@ const TourDetails = () => {
           <h2 className="font-display text-2xl font-bold text-foreground mb-6">What's Included</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {tour.inclusions.map((inclusion, index) => (
-              <div 
+              <div
                 key={index}
                 className="flex items-start gap-3 bg-background p-4 rounded-xl"
               >

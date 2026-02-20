@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCMSTours } from "@/hooks/useCMSData";
+import { useCMSTours } from "@/hooks/useWixCMS";
 import { Tour, TourItinerary } from "@/data/tours";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,7 +101,7 @@ const TourManager = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.duration) {
       toast({
         title: "Validation Error",
@@ -128,7 +128,7 @@ const TourManager = () => {
       addTour(tourData);
       toast({ title: "Tour Added", description: `${formData.name} has been added.` });
     }
-    
+
     setIsDialogOpen(false);
     setFormData(emptyTour);
     setEditingTour(null);
@@ -321,9 +321,9 @@ const TourManager = () => {
                           placeholder="https://example.com/tour-image.jpg"
                         />
                         {formData.imageUrl && (
-                          <img 
-                            src={formData.imageUrl} 
-                            alt="Preview" 
+                          <img
+                            src={formData.imageUrl}
+                            alt="Preview"
                             className="w-32 h-24 object-cover rounded border mt-2"
                             onError={(e) => (e.currentTarget.style.display = 'none')}
                           />

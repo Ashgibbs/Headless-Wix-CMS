@@ -20,11 +20,11 @@ export const queryKeys = {
  */
 export function useCMSTemples() {
   const queryClient = useQueryClient();
-  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY;
+  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY || import.meta.env.VITE_USE_PROXY === 'true';
 
   const { data: temples = [], isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.temples,
-    queryFn: async () => {
+    queryFn: async (): Promise<Temple[]> => {
       if (isWixConfigured) {
         try {
           return await fetchTemples();
@@ -51,24 +51,24 @@ export function useCMSTemples() {
     invalidateTemples,
     // For backward compatibility, keep these methods but they won't modify Wix CMS
     // To modify Wix CMS data, use the Wix CMS dashboard
-    addTemple: useCallback(() => {
+    addTemple: useCallback((..._args: any[]) => {
       console.warn('addTemple: To add temples, please use the Wix CMS dashboard');
     }, []),
-    updateTemple: useCallback(() => {
+    updateTemple: useCallback((..._args: any[]) => {
       console.warn('updateTemple: To update temples, please use the Wix CMS dashboard');
       invalidateTemples();
     }, [invalidateTemples]),
-    deleteTemple: useCallback(() => {
+    deleteTemple: useCallback((..._args: any[]) => {
       console.warn('deleteTemple: To delete temples, please use the Wix CMS dashboard');
       invalidateTemples();
     }, [invalidateTemples]),
     getTemple: useCallback((id: number) => {
       return temples.find(t => t.id === id);
     }, [temples]),
-    resetToDefault: useCallback(() => {
+    resetToDefault: useCallback((..._args: any[]) => {
       console.warn('resetToDefault: This function is not available with Wix CMS');
     }, []),
-    setTemples: useCallback(() => {
+    setTemples: useCallback((..._args: any[]) => {
       console.warn('setTemples: To modify temples, please use the Wix CMS dashboard');
       invalidateTemples();
     }, [invalidateTemples]),
@@ -79,11 +79,11 @@ export function useCMSTemples() {
  * Hook to fetch a single temple by ID or slug
  */
 export function useCMSTemple(idOrSlug: string | number) {
-  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY;
+  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY || import.meta.env.VITE_USE_PROXY === 'true';
 
   const { data: temple, isLoading, error } = useQuery({
     queryKey: queryKeys.temple(idOrSlug),
-    queryFn: async () => {
+    queryFn: async (): Promise<Temple | null> => {
       if (isWixConfigured) {
         try {
           return await fetchTempleById(idOrSlug);
@@ -113,11 +113,11 @@ export function useCMSTemple(idOrSlug: string | number) {
  */
 export function useCMSTours() {
   const queryClient = useQueryClient();
-  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY;
+  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY || import.meta.env.VITE_USE_PROXY === 'true';
 
   const { data: tours = [], isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.tours,
-    queryFn: async () => {
+    queryFn: async (): Promise<Tour[]> => {
       if (isWixConfigured) {
         try {
           return await fetchTours();
@@ -143,24 +143,24 @@ export function useCMSTours() {
     refetch,
     invalidateTours,
     // For backward compatibility
-    addTour: useCallback(() => {
+    addTour: useCallback((..._args: any[]) => {
       console.warn('addTour: To add tours, please use the Wix CMS dashboard');
     }, []),
-    updateTour: useCallback(() => {
+    updateTour: useCallback((..._args: any[]) => {
       console.warn('updateTour: To update tours, please use the Wix CMS dashboard');
       invalidateTours();
     }, [invalidateTours]),
-    deleteTour: useCallback(() => {
+    deleteTour: useCallback((..._args: any[]) => {
       console.warn('deleteTour: To delete tours, please use the Wix CMS dashboard');
       invalidateTours();
     }, [invalidateTours]),
     getTour: useCallback((id: number) => {
       return tours.find(t => t.id === id);
     }, [tours]),
-    resetToDefault: useCallback(() => {
+    resetToDefault: useCallback((..._args: any[]) => {
       console.warn('resetToDefault: This function is not available with Wix CMS');
     }, []),
-    setTours: useCallback(() => {
+    setTours: useCallback((..._args: any[]) => {
       console.warn('setTours: To modify tours, please use the Wix CMS dashboard');
       invalidateTours();
     }, [invalidateTours]),
@@ -171,11 +171,11 @@ export function useCMSTours() {
  * Hook to fetch a single tour by ID or slug
  */
 export function useCMSTour(idOrSlug: string | number) {
-  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY;
+  const isWixConfigured = !!import.meta.env.VITE_WIX_API_KEY || import.meta.env.VITE_USE_PROXY === 'true';
 
   const { data: tour, isLoading, error } = useQuery({
     queryKey: queryKeys.tour(idOrSlug),
-    queryFn: async () => {
+    queryFn: async (): Promise<Tour | null> => {
       if (isWixConfigured) {
         try {
           return await fetchTourById(idOrSlug);
@@ -215,7 +215,7 @@ export function useCMSExport() {
       version: '1.0',
       source: 'Wix CMS'
     };
-    
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

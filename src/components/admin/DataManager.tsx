@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { useCMSExport, useCMSImport, useCMSTemples, useCMSTours } from "@/hooks/useCMSData";
+import { useCMSImport } from "@/hooks/useCMSData";
+import { useCMSExport, useCMSTemples, useCMSTours } from "@/hooks/useWixCMS";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, Upload, Database, Map, Route, AlertTriangle } from "lucide-react";
@@ -135,7 +136,7 @@ const DataManager = () => {
               <Download className="w-4 h-4 mr-2" />
               Export All Data
             </Button>
-            
+
             <input
               ref={fileInputRef}
               type="file"
@@ -143,10 +144,10 @@ const DataManager = () => {
               onChange={handleFileChange}
               className="hidden"
             />
-            
-            <Button 
-              variant="outline" 
-              onClick={handleImportClick} 
+
+            <Button
+              variant="outline"
+              onClick={handleImportClick}
               disabled={isImporting}
               className="flex-1"
             >
@@ -189,7 +190,7 @@ const DataManager = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Reset All Data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will delete all your custom temples and tours and restore the original default data. 
+                  This will delete all your custom temples and tours and restore the original default data.
                   This action cannot be undone. Consider exporting your data first.
                 </AlertDialogDescription>
               </AlertDialogHeader>

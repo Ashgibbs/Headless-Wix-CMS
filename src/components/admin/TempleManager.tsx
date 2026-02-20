@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCMSTemples } from "@/hooks/useCMSData";
+import { useCMSTemples } from "@/hooks/useWixCMS";
 import { Temple, getUniqueDeities, getUniqueStates } from "@/data/temples";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +90,7 @@ const TempleManager = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.deity || !formData.state) {
       toast({
         title: "Validation Error",
@@ -112,7 +112,7 @@ const TempleManager = () => {
       addTemple(templeData);
       toast({ title: "Temple Added", description: `${formData.name} has been added.` });
     }
-    
+
     setIsDialogOpen(false);
     setFormData(emptyTemple);
     setGalleryInput("");
@@ -287,9 +287,9 @@ const TempleManager = () => {
                           placeholder="https://example.com/temple-image.jpg"
                         />
                         {formData.imageUrl && (
-                          <img 
-                            src={formData.imageUrl} 
-                            alt="Preview" 
+                          <img
+                            src={formData.imageUrl}
+                            alt="Preview"
                             className="w-32 h-24 object-cover rounded border mt-2"
                             onError={(e) => (e.currentTarget.style.display = 'none')}
                           />
