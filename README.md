@@ -1,3 +1,4 @@
+
 # Temple Gateway 🕉️
 
 **Temple Gateway** is a spiritual platform designed to serve as a comprehensive database for temples and a premier tour arranging service. Bridging the gap between technology and tradition, this application helps devotees discover ancient temples, plan pilgrimages, and access daily cultural astrological data.
@@ -67,6 +68,7 @@ Ensure you have the following installed:
     # or
     yarn dev
     ```
+
 
 
 
