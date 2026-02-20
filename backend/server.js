@@ -1,44 +1,39 @@
-import express from 'express';
-import cors from 'cors';
-import { config } from 'dotenv';
-import { createClient, ApiKeyStrategy } from '@wix/sdk';
-import { items } from '@wix/data';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import express from "express";
+import cors from "cors";
+import { config } from "dotenv";
+import { createClient, ApiKeyStrategy } from "@wix/sdk";
+import { items } from "@wix/data";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
-// Load .env from project root (where package.json is)
+// ---------------- LOAD ENV ----------------
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-config({ path: join(__dirname, '..', '.env') });
+config({ path: join(__dirname, "..", ".env") });
 
-// Support both WIX_* and VITE_WIX_* env vars (for shared .env)
-const WIX_API_KEY = process.env.WIX_API_KEY || process.env.VITE_WIX_API_KEY;
-const WIX_SITE_ID = process.env.WIX_SITE_ID || process.env.VITE_WIX_SITE_ID;
+const WIX_API_KEY =
+  process.env.WIX_API_KEY || process.env.VITE_WIX_API_KEY;
+const WIX_SITE_ID =
+  process.env.WIX_SITE_ID || process.env.VITE_WIX_SITE_ID;
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({
-  origin: 'http://localhost:8080',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:8080",
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
-// ---------------- HEALTH CHECK ----------------
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Backend proxy is running' });
-});
-
-// ---------------- CREATE WIX CLIENT ----------------
+// ---------------- WIX CLIENT ----------------
 
 function getWixClient() {
   if (!WIX_API_KEY || !WIX_SITE_ID) {
-    console.error('❌ Missing credentials:');
-    console.error('   WIX_API_KEY:', WIX_API_KEY ? '✅ Set' : '❌ Missing');
-    console.error('   WIX_SITE_ID:', WIX_SITE_ID ? '✅ Set' : '❌ Missing');
-    throw new Error("WIX_API_KEY or WIX_SITE_ID missing in .env file. Backend needs these to connect to Wix CMS.");
+    throw new Error("Missing Wix credentials in .env");
   }
 
   return createClient({
@@ -50,107 +45,101 @@ function getWixClient() {
   });
 }
 
-// ---------------- TOURS API ----------------
+// ---------------- SAFE FIELD EXTRACTOR ----------------
 
-app.get('/api/tours', async (req, res) => {
+function extractFields(item) {
+  return item.data && Object.keys(item.data).length > 0
+    ? item.data
+    : item;
+}
+
+// =====================================================
+// ================= TEMPLES API =======================
+// =====================================================
+
+app.get("/api/temples", async (req, res) => {
   try {
     const client = getWixClient();
 
-    console.log('🔍 Fetching tours...');
     const result = await client.items
-      .query('PilgrimagePackagesDB') // make sure this is correct Collection ID
+      .query("TempleandToursDB")
       .find();
-
-    console.log(`✅ Found ${result.items.length} tours`);
-
-    const tours = result.items.map((item) => {
-      // Wix returns data in item.data object
-      const fields = item.data || {};
-      
-      return {
-        id: item._id || item.data?._id || Date.now(),
-        name: fields.name || '',
-        slug: fields.slug || fields.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '',
-        duration: fields.duration || '',
-        days: parseInt(fields.days) || 0,
-        nights: parseInt(fields.nights) || 0,
-        groupSize: fields.groupSize || '',
-        rating: parseFloat(fields.rating) || 0,
-        description: fields.description || '',
-        longDescription: fields.longDescription || fields.description || '',
-        templesCount: parseInt(fields.templesCount) || 0,
-        citiesCovered: Array.isArray(fields.citiesCovered) ? fields.citiesCovered : (fields.citiesCovered ? fields.citiesCovered.split(',').filter(Boolean) : []),
-        highlights: Array.isArray(fields.highlights) ? fields.highlights : (fields.highlights ? fields.highlights.split('\n').filter(Boolean) : []),
-        inclusions: Array.isArray(fields.inclusions) ? fields.inclusions : (fields.inclusions ? fields.inclusions.split('\n').filter(Boolean) : []),
-        imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
-        galleryImages: fields.galleryImages || fields.gallery?.map((img) => img.url || img) || [],
-        videoUrl: fields.videoUrl || '',
-      };
-    });
-
-    res.json(tours);
-
-  } catch (error) {
-    console.error('❌ Tours error:', error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorDetails = error instanceof Error && 'details' in error ? error.details : null;
-    
-    res.status(500).json({ 
-      error: errorMessage,
-      details: errorDetails,
-      message: 'Failed to fetch tours from Wix CMS. Check backend logs for details.'
-    });
-  }
-});
-
-// ---------------- TEMPLES API ----------------
-
-app.get('/api/temples', async (req, res) => {
-  try {
-    const client = getWixClient();
-
-    console.log('🔍 Fetching temples...');
-    const result = await client.items
-      .query('TempleandToursDB') // make sure this is correct Collection ID
-      .find();
-
-    console.log(`✅ Found ${result.items.length} temples`);
 
     const temples = result.items.map((item) => {
-      // Wix returns data in item.data object
-      const fields = item.data || {};
-      
+      const f = extractFields(item);
+
       return {
-        id: item._id || item.data?._id || Date.now(),
-        name: fields.name || '',
-        deity: fields.deity || '',
-        deityName: fields.deityName || '',
-        otherDeity: fields.otherDeity || '',
-        famousFor: fields.famousFor || '',
-        district: fields.district || '',
-        state: fields.state || '',
-        latitude: parseFloat(fields.latitude) || 0,
-        longitude: parseFloat(fields.longitude) || 0,
-        content: fields.content || '',
-        slug: fields.slug || fields.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '',
-        imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
-        galleryImages: fields.galleryImages || fields.gallery?.map((img) => img.url || img) || [],
-        videoUrl: fields.videoUrl || '',
+        id: item._id,
+        name: f.name ?? "",
+        deity: f.deity ?? "",
+        deityName: f.deity_name_in_temple ?? "",
+        otherDeity: f.other_deity ?? "",
+        famousFor: f.famous_for ?? "",
+        openTime: f.open_time ?? "",
+        belief: f.belief ?? "",
+        address1: f.address1 ?? "",
+        address2: f.address2 ?? "",
+        town: f.town ?? "",
+        district: f.district ?? "",
+        state: f.state ?? "",
+        country: f.country ?? "",
+        pincode: f.pincode ?? "",
+        latitude: Number(f.latitude) || 0,
+        longitude: Number(f.longitude) || 0,
+        content: f.content ?? "",
+        slug:
+          f.slug ??
+          f.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-") ??
+          "",
       };
     });
 
     res.json(temples);
-
   } catch (error) {
-    console.error('❌ Temples error:', error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorDetails = error instanceof Error && 'details' in error ? error.details : null;
-    
-    res.status(500).json({ 
-      error: errorMessage,
-      details: errorDetails,
-      message: 'Failed to fetch temples from Wix CMS. Check backend logs for details.'
+    console.error("Temples Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// =====================================================
+// ================= TOURS API =========================
+// =====================================================
+
+app.get("/api/tours", async (req, res) => {
+  try {
+    const client = getWixClient();
+
+    const result = await client.items
+      .query("PilgrimagePackagesDB")
+      .find();
+
+    const tours = result.items.map((item) => {
+      const f = extractFields(item);
+
+      return {
+        id: item._id,
+        name: f.title ?? "", // 🔥 IMPORTANT FIX
+        duration: f.duration ?? "",
+        state: f.state ?? "",
+        zone: f.zone ?? "",
+        placesCovered: typeof f.placesCovered === "string"
+          ? f.placesCovered.split(",").map((p) => p.trim())
+          : f.placesCovered ?? [],
+        templesCovered: Number(f.templesCovered) || 0,
+        inclusionsAndExclusions:
+          f.inclusionsAndExclusions ?? "",
+        itenary: f.itenary ?? "", // 🔥 MATCHING YOUR FIELD ID
+        slug:
+          f.slug ??
+          f.title?.toLowerCase().replace(/[^a-z0-9]+/g, "-") ??
+          "",
+      };
     });
+
+    res.json(tours);
+  } catch (error) {
+    console.error("Tours Error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -158,7 +147,4 @@ app.get('/api/temples', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n✅ Backend running at http://localhost:${PORT}`);
-  console.log(`GET /health`);
-  console.log(`GET /api/tours`);
-  console.log(`GET /api/temples\n`);
 });
