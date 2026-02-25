@@ -11,6 +11,14 @@ export interface Temple {
   longitude: number;
   content: string;
   slug: string;
+  // Optional extended fields from Wix CMS / backend
+  openTime?: string;
+  belief?: string;
+  address1?: string;
+  address2?: string;
+  town?: string;
+  country?: string;
+  pincode?: string;
   // Media fields
   imageUrl?: string;
   galleryImages?: string[];

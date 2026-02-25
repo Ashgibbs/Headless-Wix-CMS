@@ -45,6 +45,21 @@ function getWixClient() {
   });
 }
 
+// ---------------- WIX IMAGE EXTRACTOR ----------------
+function getWixImageUrl(wixUrl) {
+  if (!wixUrl) return "";
+  if (typeof wixUrl !== "string") return "";
+  if (wixUrl.startsWith("http")) return wixUrl;
+  if (wixUrl.startsWith("wix:image://v1/")) {
+    const parts = wixUrl.split("/");
+    if (parts.length >= 4) {
+      const uri = parts[3];
+      return `https://static.wixstatic.com/media/${uri}`;
+    }
+  }
+  return wixUrl;
+}
+
 // ---------------- SAFE FIELD EXTRACTOR ----------------
 
 function extractFields(item) {
@@ -87,6 +102,8 @@ app.get("/api/temples", async (req, res) => {
         latitude: Number(f.latitude) || 0,
         longitude: Number(f.longitude) || 0,
         content: f.content ?? "",
+        // Media fields
+        imageUrl: getWixImageUrl(f.image_fld), // 🔥 UPDATED TO MATCH WIX FIELD ID "image_fld"
         slug:
           f.slug ??
           f.name?.toLowerCase().replace(/[^a-z0-9]+/g, "-") ??
@@ -118,7 +135,8 @@ app.get("/api/tours", async (req, res) => {
 
       return {
         id: item._id,
-        name: f.title ?? "", // 🔥 IMPORTANT FIX
+        name: f.title ?? "",
+        imageUrl: getWixImageUrl(f.image),
         duration: f.duration ?? "",
         state: f.state ?? "",
         zone: f.zone ?? "",
@@ -128,7 +146,7 @@ app.get("/api/tours", async (req, res) => {
         templesCovered: Number(f.templesCovered) || 0,
         inclusionsAndExclusions:
           f.inclusionsAndExclusions ?? "",
-        itenary: f.itenary ?? "", // 🔥 MATCHING YOUR FIELD ID
+        itenary: f.itenary ?? "",
         slug:
           f.slug ??
           f.title?.toLowerCase().replace(/[^a-z0-9]+/g, "-") ??

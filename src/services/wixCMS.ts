@@ -1,5 +1,6 @@
 import { items } from '@wix/data';
 import { createClient, ApiKeyStrategy } from '@wix/sdk';
+import { getWixImageUrl } from '@/lib/utils';
 
 // Initialize Wix SDK
 let wixClient: ReturnType<typeof createClient> | null = null;
@@ -20,7 +21,7 @@ export function initializeWixClient(apiKey: string, siteId?: string) {
       console.warn('⚠️ Site ID not provided. API calls may fail with "MetaSite not found" error.');
       console.warn('💡 Solution: Use a backend proxy or provide VITE_WIX_SITE_ID in .env');
     }
-    
+
     wixClient = createClient({
       modules: { items },
       auth: ApiKeyStrategy(authConfig),
@@ -36,7 +37,7 @@ export function getWixClient() {
   if (!wixClient) {
     const apiKey = import.meta.env.VITE_WIX_API_KEY;
     const siteId = import.meta.env.VITE_WIX_SITE_ID;
-    
+
     if (!apiKey) {
       throw new Error('Wix API Key is not configured. Please set VITE_WIX_API_KEY in your .env file');
     }
@@ -51,7 +52,7 @@ export function getWixClient() {
         `VITE_WIX_SITE_ID must be a GUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx), not a URL. Received: ${siteId}`
       );
     }
-    
+
     wixClient = initializeWixClient(apiKey, siteId);
   }
   return wixClient;
@@ -94,15 +95,15 @@ export async function fetchTemples() {
     const client = getWixClient();
     // Query data items using the query() method
     const dataItemsList = await client.items.query(COLLECTIONS.TEMPLES).find();
-    
+
     console.log('Temples Data Items:');
     console.log('Total: ', dataItemsList.items.length);
-    
+
     return dataItemsList.items.map((item: any) => {
       // Extract field values from Wix data item structure
       // Wix returns data in item.data object
       const fields = item.data || {};
-      
+
       return {
         id: item._id || item.data?._id || Date.now(),
         name: fields.name || '',
@@ -116,7 +117,7 @@ export async function fetchTemples() {
         longitude: parseFloat(fields.longitude) || 0,
         content: fields.content || '',
         slug: fields.slug || fields.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '',
-        imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
+        imageUrl: getWixImageUrl(fields.image_fld) || getWixImageUrl(fields.image) || fields.imageUrl || fields.mainImage?.[0]?.url || '',
         galleryImages: fields.galleryImages || fields.gallery?.map((img: any) => img.url || img) || [],
         videoUrl: fields.videoUrl || '',
       };
@@ -134,20 +135,20 @@ export async function fetchTempleById(idOrSlug: string | number) {
   try {
     const client = getWixClient();
     const isNumeric = !isNaN(Number(idOrSlug));
-    
+
     // Query with filter to find specific item
     const dataItemsList = await client.items
       .query(COLLECTIONS.TEMPLES)
       .eq(isNumeric ? '_id' : 'slug', String(idOrSlug))
       .find();
-    
+
     if (dataItemsList.items.length === 0) {
       return null;
     }
-    
+
     const item = dataItemsList.items[0];
     const fields = item.data || {};
-    
+
     return {
       id: item._id || item.data?._id || Date.now(),
       name: fields.name || '',
@@ -161,7 +162,7 @@ export async function fetchTempleById(idOrSlug: string | number) {
       longitude: parseFloat(fields.longitude) || 0,
       content: fields.content || '',
       slug: fields.slug || fields.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '',
-      imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
+      imageUrl: getWixImageUrl(fields.image_fld) || getWixImageUrl(fields.image) || fields.imageUrl || fields.mainImage?.[0]?.url || '',
       galleryImages: fields.galleryImages || fields.gallery?.map((img: any) => img.url || img) || [],
       videoUrl: fields.videoUrl || '',
     };
@@ -187,13 +188,13 @@ export async function fetchTours() {
     console.log('⚠️ Direct Wix API call (may fail due to CORS)...');
     const client = getWixClient();
     const collectionId = COLLECTIONS.TOURS;
-    
+
     console.log('🔍 Fetching tours from Wix CMS...');
     console.log('📦 Collection ID:', collectionId);
-    
+
     // Query data items using the query() method
     const dataItemsList = await client.items.query(collectionId).find();
-    
+
     console.log('✅ Pilgrimage Packages Data Items:');
     console.log('📊 Total: ', dataItemsList.items.length);
     console.log('📋 Item IDs:', dataItemsList.items
@@ -205,10 +206,10 @@ export async function fetchTours() {
       .join(', ')
     );
     console.log('🔍 Full Response:', dataItemsList);
-    
+
     return dataItemsList.items.map((item: any) => {
       const fields = item.data || {};
-      
+
       return {
         id: item._id || item.data?._id || Date.now(),
         name: fields.name || '',
@@ -231,7 +232,7 @@ export async function fetchTours() {
           temples: Array.isArray(it.temples) ? it.temples : (it.temples ? it.temples.split(',').filter(Boolean) : []),
           cities: Array.isArray(it.cities) ? it.cities : (it.cities ? it.cities.split(',').filter(Boolean) : []),
         })) : [],
-        imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
+        imageUrl: getWixImageUrl(fields.image) || fields.imageUrl || fields.mainImage?.[0]?.url || '',
         galleryImages: fields.galleryImages || fields.gallery?.map((img: any) => img.url || img) || [],
         videoUrl: fields.videoUrl || '',
       };
@@ -249,20 +250,20 @@ export async function fetchTourById(idOrSlug: string | number) {
   try {
     const client = getWixClient();
     const isNumeric = !isNaN(Number(idOrSlug));
-    
+
     // Query with filter to find specific item
     const dataItemsList = await client.items
       .query(COLLECTIONS.TOURS)
       .eq(isNumeric ? '_id' : 'slug', String(idOrSlug))
       .find();
-    
+
     if (dataItemsList.items.length === 0) {
       return null;
     }
-    
+
     const item = dataItemsList.items[0];
     const fields = item.data || {};
-    
+
     return {
       id: item._id || item.data?._id || Date.now(),
       name: fields.name || '',
@@ -285,7 +286,7 @@ export async function fetchTourById(idOrSlug: string | number) {
         temples: Array.isArray(it.temples) ? it.temples : (it.temples ? it.temples.split(',').filter(Boolean) : []),
         cities: Array.isArray(it.cities) ? it.cities : (it.cities ? it.cities.split(',').filter(Boolean) : []),
       })) : [],
-      imageUrl: fields.imageUrl || fields.mainImage?.[0]?.url || '',
+      imageUrl: getWixImageUrl(fields.image) || fields.imageUrl || fields.mainImage?.[0]?.url || '',
       galleryImages: fields.galleryImages || fields.gallery?.map((img: any) => img.url || img) || [],
       videoUrl: fields.videoUrl || '',
     };

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useCMSTemples } from "@/hooks/useWixCMS";
 import TempleMap from "@/components/TempleMap";
@@ -154,34 +155,124 @@ const Temples = () => {
                 filteredTemples.map((temple: any) => (
                   <div
                     key={temple.id}
-                    className="bg-card p-5 rounded-xl shadow cursor-pointer"
+                    className="bg-card p-5 rounded-xl shadow cursor-pointer flex flex-col sm:flex-row gap-5"
                     onClick={() => setSelectedTemple(temple)}
                   >
-                    <h3 className="font-semibold">{temple.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {temple.district}, {temple.state}
-                    </p>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedTemple(
-                          expandedTemple === temple.id ? null : temple.id
-                        );
-                      }}
-                    >
-                      {expandedTemple === temple.id ? (
-                        <ChevronUp size={18} />
-                      ) : (
-                        <ChevronDown size={18} />
-                      )}
-                    </button>
-
-                    {expandedTemple === temple.id && (
-                      <div className="mt-3 text-sm text-muted-foreground">
-                        {temple.content}
+                    {/* Image Thumbnail */}
+                    {temple.imageUrl && (
+                      <div className="w-full sm:w-32 h-32 flex-shrink-0 relative rounded-lg overflow-hidden bg-muted">
+                        <img
+                          src={temple.imageUrl}
+                          alt={temple.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
                       </div>
                     )}
+
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{temple.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {temple.district}, {temple.state}
+                      </p>
+
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedTemple(
+                              expandedTemple === temple.id ? null : temple.id
+                            );
+                          }}
+                          className="text-xs inline-flex items-center gap-1 text-primary"
+                        >
+                          {expandedTemple === temple.id ? (
+                            <>
+                              <ChevronUp size={14} />
+                              Hide summary
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown size={14} />
+                              View summary
+                            </>
+                          )}
+                        </button>
+
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link to={`/temple/${temple.slug}`}>View details</Link>
+                        </Button>
+                      </div>
+
+                      {expandedTemple === temple.id && (
+                        <div className="mt-3 text-sm text-muted-foreground space-y-1">
+                          {temple.content && <p>{temple.content}</p>}
+
+                          {temple.deityName && (
+                            <p>
+                              <span className="font-medium">Main Deity: </span>
+                              {temple.deityName}
+                            </p>
+                          )}
+
+                          {temple.otherDeity && (
+                            <p>
+                              <span className="font-medium">Other Deities: </span>
+                              {temple.otherDeity}
+                            </p>
+                          )}
+
+                          {temple.famousFor && (
+                            <p>
+                              <span className="font-medium">Famous For: </span>
+                              {temple.famousFor}
+                            </p>
+                          )}
+
+                          {temple.openTime && (
+                            <p>
+                              <span className="font-medium">Timings: </span>
+                              {temple.openTime}
+                            </p>
+                          )}
+
+                          {temple.belief && (
+                            <p>
+                              <span className="font-medium">Belief: </span>
+                              {temple.belief}
+                            </p>
+                          )}
+
+                          {(temple.address1 ||
+                            temple.address2 ||
+                            temple.town ||
+                            temple.district ||
+                            temple.state ||
+                            temple.country ||
+                            temple.pincode) && (
+                              <p>
+                                <span className="font-medium">Address: </span>
+                                {[
+                                  temple.address1,
+                                  temple.address2,
+                                  temple.town,
+                                  temple.district,
+                                  temple.state,
+                                  temple.country,
+                                  temple.pincode,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ")}
+                              </p>
+                            )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               )}

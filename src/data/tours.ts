@@ -22,6 +22,13 @@ export interface Tour {
   highlights: string[];
   inclusions: string[];
   itinerary: TourItinerary[];
+  // Optional extra fields coming from Wix/Backend proxy
+  state?: string;
+  zone?: string;
+  placesCovered?: string[];
+  templesCovered?: number;
+  inclusionsAndExclusions?: string;
+  itenary?: string;
   // Media fields
   imageUrl?: string;
   galleryImages?: string[];

@@ -11,6 +11,7 @@ import Pilgrimage from "./pages/Pilgrimage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import TourDetails from "./pages/TourDetails";
+import TempleDetails from "./pages/TempleDetails";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/temples" element={<Temples />} />
+            <Route path="/temple/:slug" element={<TempleDetails />} />
             <Route path="/pilgrimage" element={<Pilgrimage />} />
             <Route path="/tour/:slug" element={<TourDetails />} />
             <Route path="/about" element={<About />} />

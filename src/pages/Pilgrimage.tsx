@@ -95,11 +95,19 @@ const Pilgrimage = () => {
                   key={pkg.id}
                   className="bg-card rounded-2xl overflow-hidden shadow-card"
                 >
-                  <div className="relative h-48 bg-gradient-hero flex items-center justify-center">
-                    <span className="text-8xl text-primary-foreground/20">
-                      {pkg.name?.charAt(0)}
-                    </span>
-                    <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/90 px-2 py-1 rounded-full">
+                  <div className="relative h-48 bg-gradient-hero flex items-center justify-center bg-muted">
+                    {pkg.imageUrl ? (
+                      <img
+                        src={pkg.imageUrl}
+                        alt={pkg.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-8xl text-primary-foreground/20">
+                        {pkg.name?.charAt(0)}
+                      </span>
+                    )}
+                    <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/90 px-2 py-1 rounded-full z-10">
                       <Star size={14} className="text-yellow-500 fill-yellow-500" />
                       <span className="text-sm">{pkg.rating}</span>
                     </div>
@@ -110,20 +118,40 @@ const Pilgrimage = () => {
                       {pkg.name}
                     </h3>
 
-                    <div className="flex gap-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        {pkg.duration}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users size={14} />
-                        {pkg.groupSize}
-                      </div>
+                    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                      {pkg.duration && (
+                        <div className="flex items-center gap-1">
+                          <Clock size={14} />
+                          {pkg.duration}
+                        </div>
+                      )}
+
+                      {pkg.groupSize && (
+                        <div className="flex items-center gap-1">
+                          <Users size={14} />
+                          {pkg.groupSize}
+                        </div>
+                      )}
+
+                      {pkg.state && (
+                        <div className="flex items-center gap-1">
+                          <MapPin size={14} />
+                          {pkg.state}
+                        </div>
+                      )}
+
+                      {pkg.zone && (
+                        <Badge variant="outline">
+                          {pkg.zone}
+                        </Badge>
+                      )}
                     </div>
 
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {pkg.description}
-                    </p>
+                    {pkg.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {pkg.description}
+                      </p>
+                    )}
 
                     <div className="flex flex-wrap gap-2">
                       {pkg.citiesCovered?.slice(0, 3)?.map((city: string) => (
@@ -132,6 +160,29 @@ const Pilgrimage = () => {
                           {city}
                         </Badge>
                       ))}
+
+                      {pkg.placesCovered?.length > 0 &&
+                        pkg.placesCovered.slice(0, 3).map((place: string) => (
+                          <Badge key={place} variant="secondary">
+                            {place}
+                          </Badge>
+                        ))}
+                    </div>
+
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      {typeof pkg.templesCovered !== "undefined" && (
+                        <p>
+                          <span className="font-medium">Temples Covered: </span>
+                          {pkg.templesCovered}
+                        </p>
+                      )}
+
+                      {pkg.inclusionsAndExclusions && (
+                        <p className="line-clamp-2">
+                          <span className="font-medium">Inclusions / Exclusions: </span>
+                          {pkg.inclusionsAndExclusions}
+                        </p>
+                      )}
                     </div>
 
                     <div className="pt-4 flex justify-between border-t">
