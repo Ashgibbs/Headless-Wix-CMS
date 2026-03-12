@@ -133,6 +133,14 @@ export async function fetchTemples() {
  */
 export async function fetchTempleById(idOrSlug: string | number) {
   try {
+    // Browsers can't call Wix APIs with ApiKeyStrategy due to CORS.
+    // Use the local proxy when enabled.
+    if (import.meta.env.VITE_USE_PROXY === 'true') {
+      console.log(`🔄 Using proxy to fetch temple: ${idOrSlug}...`);
+      const { fetchTempleByIdFromProxy } = await import('./wixCMSProxy');
+      return await fetchTempleByIdFromProxy(idOrSlug);
+    }
+
     const client = getWixClient();
     const isNumeric = !isNaN(Number(idOrSlug));
 
@@ -221,7 +229,7 @@ export async function fetchTours() {
         rating: parseFloat(fields.rating) || 0,
         description: fields.description || '',
         longDescription: fields.longDescription || fields.description || '',
-        templesCount: parseInt(fields.templesCount) || 0,
+        templesCount: parseInt(fields.templeCount || fields.templesCount || 0) || 0,
         citiesCovered: Array.isArray(fields.citiesCovered) ? fields.citiesCovered : (fields.citiesCovered ? fields.citiesCovered.split(',').filter(Boolean) : []),
         highlights: Array.isArray(fields.highlights) ? fields.highlights : (fields.highlights ? fields.highlights.split('\n').filter(Boolean) : []),
         inclusions: Array.isArray(fields.inclusions) ? fields.inclusions : (fields.inclusions ? fields.inclusions.split('\n').filter(Boolean) : []),
@@ -248,6 +256,14 @@ export async function fetchTours() {
  */
 export async function fetchTourById(idOrSlug: string | number) {
   try {
+    // Browsers can't call Wix APIs with ApiKeyStrategy due to CORS.
+    // Use the local proxy when enabled.
+    if (import.meta.env.VITE_USE_PROXY === 'true') {
+      console.log(`🔄 Using proxy to fetch tour: ${idOrSlug}...`);
+      const { fetchTourByIdFromProxy } = await import('./wixCMSProxy');
+      return await fetchTourByIdFromProxy(idOrSlug);
+    }
+
     const client = getWixClient();
     const isNumeric = !isNaN(Number(idOrSlug));
 
@@ -275,7 +291,7 @@ export async function fetchTourById(idOrSlug: string | number) {
       rating: parseFloat(fields.rating) || 0,
       description: fields.description || '',
       longDescription: fields.longDescription || fields.description || '',
-      templesCount: parseInt(fields.templesCount) || 0,
+      templesCount: parseInt(fields.templeCount || fields.templesCount || 0) || 0,
       citiesCovered: Array.isArray(fields.citiesCovered) ? fields.citiesCovered : (fields.citiesCovered ? fields.citiesCovered.split(',').filter(Boolean) : []),
       highlights: Array.isArray(fields.highlights) ? fields.highlights : (fields.highlights ? fields.highlights.split('\n').filter(Boolean) : []),
       inclusions: Array.isArray(fields.inclusions) ? fields.inclusions : (fields.inclusions ? fields.inclusions.split('\n').filter(Boolean) : []),

@@ -28,6 +28,25 @@ export async function fetchTemplesFromProxy() {
 }
 
 /**
+ * Fetch a single temple by ID/Slug from backend proxy
+ */
+export async function fetchTempleByIdFromProxy(idOrSlug: string | number) {
+  try {
+    console.log(`🔄 Fetching temple ${idOrSlug} from proxy: ${PROXY_BASE_URL}/api/temples/${idOrSlug}`);
+    const response = await fetch(`${PROXY_BASE_URL}/api/temples/${idOrSlug}`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to fetch temple'}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Error fetching temple ${idOrSlug} from proxy:`, error);
+    throw error;
+  }
+}
+
+/**
  * Fetch all tours from backend proxy
  */
 export async function fetchToursFromProxy() {
@@ -43,6 +62,25 @@ export async function fetchToursFromProxy() {
     return data;
   } catch (error) {
     console.error('❌ Error fetching tours from proxy:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch a single tour by ID/Slug from backend proxy
+ */
+export async function fetchTourByIdFromProxy(idOrSlug: string | number) {
+  try {
+    console.log(`🔄 Fetching tour ${idOrSlug} from proxy: ${PROXY_BASE_URL}/api/tours/${idOrSlug}`);
+    const response = await fetch(`${PROXY_BASE_URL}/api/tours/${idOrSlug}`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to fetch tour'}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Error fetching tour ${idOrSlug} from proxy:`, error);
     throw error;
   }
 }

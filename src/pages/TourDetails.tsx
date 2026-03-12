@@ -1,18 +1,20 @@
 import { useParams, Link } from "react-router-dom";
+import { useMemo } from "react";
 import {
   MapPin,
   Star,
   Clock,
   Users,
   Calendar,
+  Building2,
   CheckCircle,
   ArrowLeft,
-  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/layout/Layout";
 import { useCMSTours } from "@/hooks/useWixCMS";
+import { Tour, TourItinerary } from "@/data/tours";
 
 const parseHtmlItinerary = (html: string) => {
   const textLines = html
@@ -52,14 +54,27 @@ const parseHtmlItinerary = (html: string) => {
 
 const TourDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { tours, isLoading } = useCMSTours();
-  const tour = slug ? tours.find((t: any) => t.slug === slug) : undefined;
+  const { tours, isLoading, error } = useCMSTours();
+
+  // Robust finding: first try calculated slug, then raw slug, then ID
+  const tour = useMemo(() => {
+    if (!slug || !tours) return undefined;
+
+    return tours.find(t =>
+      t.slug === slug ||
+      String(t.id) === slug ||
+      (t.name && t.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === slug)
+    );
+  }, [tours, slug]);
 
   if (isLoading) {
     return (
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading tour details...</p>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-muted-foreground animate-pulse">Loading tour details...</p>
+          </div>
         </div>
       </Layout>
     );
@@ -91,6 +106,16 @@ const TourDetails = () => {
       : Array.isArray(tour.placesCovered)
         ? tour.placesCovered
         : []) as string[];
+
+  const days =
+    typeof tour.days === "number" && tour.days > 0
+      ? tour.days
+      : typeof tour.duration === "string"
+        ? parseInt(tour.duration)
+        : undefined;
+
+  const temples =
+    Number(tour.templesCount || tour.templesCovered || 0) || undefined;
 
   const hasHighlights = Array.isArray(tour.highlights) && tour.highlights.length > 0;
   const hasItineraryArray =
@@ -146,14 +171,6 @@ const TourDetails = () => {
                     </span>
                   </div>
                 )}
-                {typeof tour.rating === "number" && tour.rating > 0 && (
-                  <div className="flex items-center gap-2 bg-primary-foreground/10 px-4 py-2 rounded-full">
-                    <Star size={18} className="text-golden fill-golden" />
-                    <span className="font-body text-primary-foreground">
-                      {tour.rating} Rating
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -170,46 +187,39 @@ const TourDetails = () => {
         </div>
       </section>
 
-      {/* Quick Stats */}
-      <section className="py-12 bg-background border-b border-border">
+      {/* Quick Stats Board */}
+      <section className="py-12 bg-background border-b border-border shadow-sm relative z-20 -mt-10 mx-auto max-w-5xl">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {tour.days && (
-              <div className="text-center p-6 bg-muted rounded-xl">
-                <Calendar className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="font-display text-3xl font-bold text-foreground">
-                  {tour.days}
-                </p>
-                <p className="font-body text-muted-foreground">Days</p>
+          <div className="bg-card rounded-2xl p-8 shadow-xl border border-border/60 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 text-primary">
+                <Calendar size={24} />
               </div>
-            )}
-            {(tour.templesCount || tour.templesCovered) && (
-              <div className="text-center p-6 bg-muted rounded-xl">
-                <Building2 className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="font-display text-3xl font-bold text-foreground">
-                  {tour.templesCount || tour.templesCovered}
-                </p>
-                <p className="font-body text-muted-foreground">Temples</p>
+              <p className="text-3xl font-bold text-foreground">
+                {days || "—"}
+              </p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Duration (Days)</p>
+            </div>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 text-primary">
+                <Building2 size={24} />
               </div>
-            )}
-            {cities.length > 0 && (
-              <div className="text-center p-6 bg-muted rounded-xl">
-                <MapPin className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="font-display text-3xl font-bold text-foreground">
-                  {cities.length}
-                </p>
-                <p className="font-body text-muted-foreground">Cities/Places</p>
+              <p className="text-3xl font-bold text-foreground">
+                {temples || "—"}
+              </p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Temples</p>
+            </div>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 text-primary">
+                <MapPin size={24} />
               </div>
-            )}
-            {typeof tour.rating === "number" && tour.rating > 0 && (
-              <div className="text-center p-6 bg-muted rounded-xl">
-                <Star className="w-8 h-8 text-golden fill-golden mx-auto mb-3" />
-                <p className="font-display text-3xl font-bold text-foreground">
-                  {tour.rating}
-                </p>
-                <p className="font-body text-muted-foreground">Rating</p>
-              </div>
-            )}
+              <p className="text-3xl font-bold text-foreground">
+                {cities.length || "—"}
+              </p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Cities Covered</p>
+            </div>
           </div>
         </div>
       </section>
@@ -273,7 +283,7 @@ const TourDetails = () => {
             </div>
 
             <div className="max-w-4xl mx-auto space-y-6">
-              {tour.itinerary.map((day: any, index: number) => (
+              {tour.itinerary.map((day: TourItinerary, index: number) => (
                 <div
                   key={index}
                   className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-elevated transition-shadow"
